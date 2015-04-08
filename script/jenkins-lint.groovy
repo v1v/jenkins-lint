@@ -30,14 +30,36 @@ def RULE_HARCODED_SCRIPT = "[JL-010] Harcoded Script over 3 lines"
 def RULE_MVN_JOB_TYPE = "[JL-011] Maven Job Type" //http://www.slideshare.net/andrewbayer/seven-habits-of-highly-effective-JL-users-2014-edition
 def RULE_SCM_GIT_SHALLOW = "[JL-012] Git shallow"
 
+// SEVERITY
+HIGH = "High"
+MEDIUM = "Medium"
+LOW = "Low"
+IGNORED = "Ignored"
+
+severity = [:]
+severity[RULE_JOB_NAME] = HIGH
+severity[RULE_LOG_ROTATOR] = HIGH
+severity[RULE_DESCRITION] = HIGH
+severity[RULE_SCM] = HIGH
+severity[RULE_SCM_TRIGGER] = HIGH
+severity[RULE_SCM_DUPLICATED_TRIGGER] = HIGH
+severity[RULE_LABELS] = HIGH
+severity[RULE_CLEANUP] = HIGH
+severity[RULE_JAVADOC] = HIGH
+severity[RULE_ARTIFACT] = HIGH
+severity[RULE_HARCODED_SCRIPT] = HIGH
+severity[RULE_MVN_JOB_TYPE] = HIGH
+severity[RULE_SCM_GIT_SHALLOW] = HIGH
+
 /**
  * Print rule with provided rule and jobName.
  *
+ * @param ruleSeverity Rule severity.
  * @param ruleDescription Text to be included in the header.
  * @param jobName Name of the Job.
  */
-def printRule(rule, jobName) {
-   println "\t$rule $jobName"
+def printRule(ruleSeverity, ruleDescription, jobName) {
+   println "\t$ruleSeverity|$ruleDescription $jobName"
 }
 
 /**
@@ -83,7 +105,7 @@ def isIgnored(ruleId, jobDescription){
 def runRule(ruleDescription, jobName, jobDescription) {
   if (jobName != null && ruleDescription != null) {
     if (!isIgnored(getRuleId(ruleDescription),jobDescription)){
-      printRule (ruleDescription, jobName)
+      printRule (severity[ruleDescription], ruleDescription, jobName)
     }
   }
 }
