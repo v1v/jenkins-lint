@@ -1,14 +1,14 @@
 import hudson.model.*
 import hudson.triggers.*
 
-//https://github.com/jenkinsci/jenkins-scripts/blob/master/scriptler/barchartGitTagList.groovy
+//https://github.com/JLci/JL-scripts/blob/master/scriptler/barchartGitTagList.groovy
 //https://scriptlerweb.appspot.com/catalog/list
   
 /**
 import net.sf.json.*
 
 @Grapes([
-    @Grab('org.kohsuke.stapler:json-lib:2.4-jenkins-1')
+    @Grab('org.kohsuke.stapler:json-lib:2.4-JL-1')
 ])
 */
   
@@ -16,23 +16,23 @@ import net.sf.json.*
 def jobs = Hudson.instance?.items
 
 // RULES
-def RULE_JOB_NAME    = "[JENKINS-000] Job name"
-def RULE_LOG_ROTATOR = "[JENKINS-001] Log Rotator doesn't exist"
-def RULE_DESCRITION  = "[JENKINS-002] Description hasn't been set"
-def RULE_SCM	     = "[JENKINS-003] SCM hasn't been set"
-def RULE_SCM_TRIGGER = "[JENKINS-004] SCM trigger is polling rather than pulling"
-def RULE_SCM_DUPLICATED_TRIGGER = "[JENKINS-005] SCM trigger is duplicated"
-def RULE_LABELS 	 = "[JENKINS-006] Restric executions"
-def RULE_CLEANUP 	 = "[JENKINS-007] CleanUp Workspace"
-def RULE_JAVADOC 	 = "[JENKINS-008] Javadoc"
-def RULE_ARTIFACT 	 = "[JENKINS-009] Artifact archiver"
-def RULE_HARCODED_SCRIPT = "[JENKINS-010] Harcoded Script over 3 lines"
-def RULE_MVN_JOB_TYPE = "[JENKINS-011] Maven Job Type" //http://www.slideshare.net/andrewbayer/seven-habits-of-highly-effective-jenkins-users-2014-edition
-def RULE_SCM_GIT_SHALLOW = "[JENKINS-012] Git shallow"
+def RULE_JOB_NAME    = "[JL-000] Job name"
+def RULE_LOG_ROTATOR = "[JL-001] Log Rotator doesn't exist"
+def RULE_DESCRITION  = "[JL-002] Description hasn't been set"
+def RULE_SCM	     = "[JL-003] SCM hasn't been set"
+def RULE_SCM_TRIGGER = "[JL-004] SCM trigger is polling rather than pulling"
+def RULE_SCM_DUPLICATED_TRIGGER = "[JL-005] SCM trigger is duplicated"
+def RULE_LABELS 	 = "[JL-006] Restric executions"
+def RULE_CLEANUP 	 = "[JL-007] CleanUp Workspace"
+def RULE_JAVADOC 	 = "[JL-008] Javadoc"
+def RULE_ARTIFACT 	 = "[JL-009] Artifact archiver"
+def RULE_HARCODED_SCRIPT = "[JL-010] Harcoded Script over 3 lines"
+def RULE_MVN_JOB_TYPE = "[JL-011] Maven Job Type" //http://www.slideshare.net/andrewbayer/seven-habits-of-highly-effective-JL-users-2014-edition
+def RULE_SCM_GIT_SHALLOW = "[JL-012] Git shallow"
 
 /**
  * provided script parameter or default value
- * 
+ *
  * @return paramTag - tag filter pattern
  */
 def printRule(description, job) {
