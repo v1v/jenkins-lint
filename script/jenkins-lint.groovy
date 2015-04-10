@@ -18,11 +18,11 @@ class Rule {
 class Job {
     String name
     String url
-    Hashtable ruleList = new Hashtable()
+    LinkedHashMap ruleList = new LinkedHashMap()
     def addRule(String ruleName, String status) {
       ruleList.put(ruleName, status)
     }
-    def addRules(Hashtable rules) {
+    def addRules(LinkedHashMap rules) {
       rules.each{
         addRule(it.key, it.value.severity)
       }
