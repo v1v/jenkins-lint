@@ -49,7 +49,7 @@ RULE_JL012 = "JL-012"
 RULE_JL013 = "JL-013"
 RULE_JL014 = "JL-014"
 
-def rulesMap = [:]
+rulesMap = [:]
 rulesMap.put(RULE_JL001, new Rule(id: RULE_JL001, description: "Job name", severity: HIGH))
 rulesMap.put(RULE_JL002, new Rule(id: RULE_JL002, description: "Log Rotator doesn't exist", severity: HIGH))
 rulesMap.put(RULE_JL003, new Rule(id: RULE_JL003, description: "Description hasn't been set", severity: HIGH))
