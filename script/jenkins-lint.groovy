@@ -232,3 +232,28 @@ html.table(class:"stats-table") {
 }
 
 new File(build.getEnvironment(listener).get('WORKSPACE') + "/build/generated.html").withWriter {it.println sb.toString()}
+
+def sb1 = new StringWriter()
+def html1 = new MarkupBuilder(sb1)
+html1.doubleQuotes = true
+html1.expandEmptyElements = true
+html1.omitEmptyAttributes = false
+html1.omitNullAttributes = false
+html1.table(class:"stats-table") {
+  tr {
+    th(id:"stats-header-jobname", "Job Name")
+    rulesMap.each{item->
+      th(id:"stats-header-rule-$item.key", "$item.key")
+    }
+  }
+  jobsMap.each{item->
+    tr {
+        td(style:"background-color: #C5D88A", "$item.value.name")
+        item.value.ruleList.each{
+          td(style:"background-color: #C5D88A", it.value)
+        }
+    }
+  }
+}
+
+new File(build.getEnvironment(listener).get('WORKSPACE') + "/build/generated1.html").withWriter {it.println sb1.toString()}
