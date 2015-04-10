@@ -1,70 +1,63 @@
+import groovy.xml.MarkupBuilder
 import hudson.model.*
 import hudson.triggers.*
+import groovy.transform.ToString
 
-// list of jobs
-jobs = Hudson.instance?.items
+@ToString(includeNames=true)
+class Rule {
+    String id
+    String description
+    String severity
+    ArrayList jobList = new ArrayList()
+    def addJob(String jobName) {
+      jobList.add(jobName)
+    }
+}
 
-// RULES
-RULE_JOB_NAME    = "[JL-000] Job name"
-RULE_LOG_ROTATOR = "[JL-001] Log Rotator doesn't exist"
-RULE_DESCRITION  = "[JL-002] Description hasn't been set"
-RULE_SCM	       = "[JL-003] SCM hasn't been set"
-RULE_SCM_TRIGGER = "[JL-004] SCM trigger is polling rather than pulling"
-RULE_SCM_DUPLICATED_TRIGGER = "[JL-005] SCM trigger is duplicated"
-RULE_LABELS 	 = "[JL-006] Restric executions"
-RULE_CLEANUP 	 = "[JL-007] CleanUp Workspace"
-RULE_JAVADOC 	 = "[JL-008] Javadoc"
-RULE_ARTIFACT 	 = "[JL-009] Artifact archiver"
-RULE_HARCODED_SCRIPT = "[JL-010] Harcoded Script over 3 lines"
-RULE_MVN_JOB_TYPE = "[JL-011] Maven Job Type" //http://www.slideshare.net/andrewbayer/seven-habits-of-highly-effective-JL-users-2014-edition
-RULE_SCM_GIT_SHALLOW = "[JL-012] Git shallow"
-RULE_MULTIJOB_TYPE = "[JL-013] Multijob"
-
-// SEVERITY
-HIGH = "High"
-MEDIUM = "Medium"
-LOW = "Low"
+HIGH    = "High"
+MEDIUM  = "Medium"
+LOW     = "Low"
 IGNORED = "Ignored"
 
-severity = [:]
-severity[RULE_JOB_NAME] = HIGH
-severity[RULE_LOG_ROTATOR] = HIGH
-severity[RULE_DESCRITION] = HIGH
-severity[RULE_SCM] = HIGH
-severity[RULE_SCM_TRIGGER] = HIGH
-severity[RULE_SCM_DUPLICATED_TRIGGER] = HIGH
-severity[RULE_LABELS] = HIGH
-severity[RULE_CLEANUP] = HIGH
-severity[RULE_JAVADOC] = HIGH
-severity[RULE_ARTIFACT] = HIGH
-severity[RULE_HARCODED_SCRIPT] = HIGH
-severity[RULE_MVN_JOB_TYPE] = HIGH
-severity[RULE_SCM_GIT_SHALLOW] = HIGH
+RULE_JL001 = "[JL-001]"
+RULE_JL002 = "[JL-002]"
+RULE_JL003 = "[JL-003]"
+RULE_JL004 = "[JL-004]"
+RULE_JL005 = "[JL-005]"
+RULE_JL006 = "[JL-006]"
+RULE_JL007 = "[JL-007]"
+RULE_JL008 = "[JL-008]"
+RULE_JL009 = "[JL-009]"
+RULE_JL010 = "[JL-010]"
+RULE_JL011 = "[JL-011]"
+RULE_JL012 = "[JL-012]"
+RULE_JL013 = "[JL-013]"
+RULE_JL014 = "[JL-014]"
+
+def rulesMap = [:]
+rulesMap.put(RULE_JL001, new Rule(id: RULE_JL001, description: "Job name", severity: HIGH))
+rulesMap.put(RULE_JL002, new Rule(id: RULE_JL002, description: "Log Rotator doesn't exist", severity: HIGH))
+rulesMap.put(RULE_JL003, new Rule(id: RULE_JL003, description: "Description hasn't been set", severity: HIGH))
+rulesMap.put(RULE_JL004, new Rule(id: RULE_JL004, description: "SCM hasn't been set", severity: HIGH))
+rulesMap.put(RULE_JL005, new Rule(id: RULE_JL005, description: "SCM trigger is polling rather than pulling", severity: HIGH))
+rulesMap.put(RULE_JL006, new Rule(id: RULE_JL006, description: "SCM trigger is duplicated", severity: HIGH))
+rulesMap.put(RULE_JL007, new Rule(id: RULE_JL007, description: "Restric Label executions", severity: HIGH))
+rulesMap.put(RULE_JL008, new Rule(id: RULE_JL008, description: "CleanUp Workspace", severity: HIGH))
+rulesMap.put(RULE_JL009, new Rule(id: RULE_JL009, description: "Javadoc", severity: HIGH))
+rulesMap.put(RULE_JL010, new Rule(id: RULE_JL010, description: "Artifact", severity: HIGH))
+rulesMap.put(RULE_JL011, new Rule(id: RULE_JL011, description: "Harcoded Script", severity: HIGH))
+rulesMap.put(RULE_JL012, new Rule(id: RULE_JL012, description: "Maven Job Type", severity: HIGH))
+rulesMap.put(RULE_JL013, new Rule(id: RULE_JL013, description: "Git Shallow", severity: HIGH))
+rulesMap.put(RULE_JL014, new Rule(id: RULE_JL014, description: "Multijob", severity: HIGH))
 
 /**
  * Print rule with provided rule and jobName.
  *
- * @param ruleSeverity Rule severity.
- * @param ruleDescription Text to be included in the header.
+ * @param ruleClass Rule class.
  * @param jobName Name of the Job.
  */
-def printRule(ruleSeverity, ruleDescription, jobName) {
-   println "\t$ruleSeverity|$ruleDescription $jobName"
-}
-
-/**
- * Return rule id.
- *
- * @param ruleDescription Rule description.
- * @return String indicating ruleId.
- */
-def getRuleId(ruleDescription){
-    myRegularExpression = /\[(JL-\d+)\] .+/
-    matcher = ( ruleDescription =~ myRegularExpression )
-
-    if (matcher.matches()) {
-      matcher[0][1]
-    }
+def printRule(ruleClass, jobName) {
+   //println "\t$ruleClass.id|$ruleClass.description|$ruleClass.severity|$jobName"
 }
 
 /**
@@ -87,54 +80,53 @@ def isIgnored(ruleId, jobDescription){
 /**
  * Return if ruleId has been ignored in the job description.
  *
- * @param ruleDescription Rule description.
+ * @param ruleClass Rule instance.
  * @param jobName Job name.
  * @param jobDescription Job description.
  * @return Boolean whether that ruleId has been ignored or not.
  */
-def runRule(ruleDescription, jobName, jobDescription) {
-  if (jobName != null && ruleDescription != null) {
-    if (!isIgnored(getRuleId(ruleDescription),jobDescription)){
-      printRule (severity[ruleDescription], ruleDescription, jobName)
+def runRule(ruleClass, jobName, jobDescription) {
+  if (jobName != null && ruleClass != null) {
+    if (!isIgnored(ruleClass.id,jobDescription)){
+      ruleClass.addJob(jobName)
+      printRule (ruleClass, jobName)
     }
   }
 }
 
-// RULES
+// list of jobs
+jobs = Hudson.instance?.items
+
+jobs?.findAll{ !it.disabled && it.name.contains(" ") }.each {
+  runRule (rulesMap[RULE_JL001], it.name, it.description)
+}
+
 jobs?.findAll{ !it.logRotator && !it.disabled }.each {
-	runRule (RULE_LOG_ROTATOR, it.name, it.description)
+  runRule (rulesMap[RULE_JL002], it.name, it.description)
 }
 
 jobs?.findAll{ !it.description && !it.disabled }.each {
-  runRule (RULE_DESCRITION, it.name, it.description)
+  runRule (rulesMap[RULE_JL003], it.name, it.description)
 }
 
 jobs?.findAll{ it.scm instanceof hudson.scm.NullSCM && !it.disabled }.each {
-  runRule (RULE_SCM, it.name, it.description)
-}
-
-jobs?.findAll{ !it.disabled && it.name.contains(" ") }.each {
-  	runRule (RULE_JOB_NAME, it.name, it.description)
+  runRule (rulesMap[RULE_JL004], it.name, it.description)
 }
 
 TriggerDescriptor SCM_TRIGGER_DESCRIPTOR = Hudson.instance.getDescriptorOrDie(SCMTrigger.class)
-assert SCM_TRIGGER_DESCRIPTOR != null;
-
 jobs?.findAll{ it.triggers.get(SCM_TRIGGER_DESCRIPTOR) && it.triggers.get(SCM_TRIGGER_DESCRIPTOR) instanceof SCMTrigger && !it.disabled }.each {
-  	runRule (RULE_SCM_TRIGGER, it.name, it.description)
+    runRule (rulesMap[RULE_JL005], it.name, it.description)
 }
 
 TriggerDescriptor SCM_TIMER_TRIGGER_DESCRIPTOR = Hudson.instance.getDescriptorOrDie(TimerTrigger.class)
-assert SCM_TIMER_TRIGGER_DESCRIPTOR != null;
-
 jobs?.findAll{ it.triggers.get(SCM_TIMER_TRIGGER_DESCRIPTOR) && it.triggers.get(SCM_TIMER_TRIGGER_DESCRIPTOR) instanceof TimerTrigger && 
                it.triggers.get(SCM_TRIGGER_DESCRIPTOR) && it.triggers.get(SCM_TRIGGER_DESCRIPTOR) instanceof SCMTrigger && 
                !it.disabled }.each {
-    runRule (RULE_SCM_DUPLICATED_TRIGGER, it.name, it.description)
+    runRule (rulesMap[RULE_JL006], it.name, it.description)
 }
 
 jobs?.findAll{ !it.disabled && !it.getAssignedLabelString() }.each {
-    runRule (RULE_LABELS, it.name, it.description)
+    runRule (rulesMap[RULE_JL007], it.name, it.description)
 }
 
 // PUBLISHERS
@@ -159,34 +151,58 @@ jobs?.findAll{ !it.disabled }.each {
         }
       }
   }
-  if (!hasCleanup) {     runRule (RULE_CLEANUP, it.name, it.description) }
-  if (!hasJavadoc) {     runRule (RULE_JAVADOC, it.name, it.description) }
-  if (!hasArtifact) {    runRule (RULE_ARTIFACT, it.name, it.description) }
+  if (!hasCleanup)  { runRule (rulesMap[RULE_JL008], it.name, it.description) }
+  if (!hasJavadoc)  { runRule (rulesMap[RULE_JL009], it.name, it.description) }
+  if (!hasArtifact) { runRule (rulesMap[RULE_JL010], it.name, it.description) }
 }
 
 // BUILDERS
 jobs?.findAll{ !it.disabled && !it instanceof hudson.maven.MavenModuleSet && it.builders}.each {
   for(p in it.builders) {
-    if (( p instanceof hudson.tasks.Shell || p instanceof hudson.tasks.BatchFile ) && p.getContents().split("\r\n|\r|\n").length > 3) {
-      runRule (RULE_HARCODED_SCRIPT, it.name, it.description)
+    if (( p instanceof hudson.tasks.Shell || p instanceof hudson.tasks.BatchFile ) &&
+          p.getContents().split("\r\n|\r|\n").length > 3) {
+      runRule (rulesMap[RULE_JL011], it.name, it.description)
     }
   }
 }
 
 jobs?.findAll{ !it.disabled && it instanceof hudson.maven.MavenModuleSet}.each {
-  runRule (RULE_MVN_JOB_TYPE, it.name, it.description)
+  runRule (rulesMap[RULE_JL012], it.name, it.description)
 }
 
 // GIT SCM
-jobs?.findAll{ it.scm && it.scm instanceof hudson.plugins.git.GitSCM && it.scm.getExtensions() && !it.disabled }.each {
+jobs?.findAll{ it.scm && it.scm instanceof hudson.plugins.git.GitSCM &&
+               it.scm.getExtensions() && !it.disabled }.each {
   for (p in it.scm.getExtensions()) {
     if (p instanceof hudson.plugins.git.extensions.impl.CloneOption && !p.isShallow()){
-  		runRule (RULE_SCM_GIT_SHALLOW, it.name, it.description)
+      runRule (rulesMap[RULE_JL013], it.name, it.description)
     }
   }
 }
 
-jobs?.findAll{ !it.disabled && it instanceof com.tikal.jenkins.plugins.multijob.MultiJobProject && 
-               (!it.getAssignedLabelString() || !it.getAssignedLabelString().contains("multijob")) }.each {
-  runRule (RULE_MULTIJOB_TYPE, it.name, it.description)
+jobs?.findAll{ !it.disabled && it instanceof com.tikal.jenkins.plugins.multijob.MultiJobProject &&
+              (!it.getAssignedLabelString() || !it.getAssignedLabelString().contains("multijob")) }.each {
+  runRule (rulesMap[RULE_JL014], it.name, it.description)
 }
+
+// HTML formatting
+def sb = new StringWriter()
+def html = new MarkupBuilder(sb)
+html.doubleQuotes = true
+html.expandEmptyElements = true
+html.omitEmptyAttributes = false
+html.omitNullAttributes = false
+html.table(class:"stats-table") {
+  tr {
+    td(id:"stats-header-ruleid", "Job")
+    td(id:"stats-header-ruleid-total", "Total")
+  }
+  rulesMap.each{item->
+    tr {
+      td(style:"background-color: #C5D88A", item.value.id)
+      td(style:"background-color: #C5D88A", item.value.jobList.size())
+    }
+  }
+}
+
+new File(build.getEnvironment(listener).get('WORKSPACE') + "/build/generated.html").withWriter {it.println sb.toString()}
