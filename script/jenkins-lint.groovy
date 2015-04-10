@@ -14,25 +14,40 @@ class Rule {
     }
 }
 
+@ToString(includeNames=true)
+class Job {
+    String name
+    String url
+    Hashtable ruleList = new Hashtable()
+    def addRule(String ruleName, String status) {
+      ruleList.put(ruleName, status)
+    }
+    def addRules(Hashtable rules) {
+      rules.each{
+        addRule(it.key, it.value.severity)
+      }
+    }
+}
+
 HIGH    = "High"
 MEDIUM  = "Medium"
 LOW     = "Low"
 IGNORED = "Ignored"
 
-RULE_JL001 = "[JL-001]"
-RULE_JL002 = "[JL-002]"
-RULE_JL003 = "[JL-003]"
-RULE_JL004 = "[JL-004]"
-RULE_JL005 = "[JL-005]"
-RULE_JL006 = "[JL-006]"
-RULE_JL007 = "[JL-007]"
-RULE_JL008 = "[JL-008]"
-RULE_JL009 = "[JL-009]"
-RULE_JL010 = "[JL-010]"
-RULE_JL011 = "[JL-011]"
-RULE_JL012 = "[JL-012]"
-RULE_JL013 = "[JL-013]"
-RULE_JL014 = "[JL-014]"
+RULE_JL001 = "JL-001"
+RULE_JL002 = "JL-002"
+RULE_JL003 = "JL-003"
+RULE_JL004 = "JL-004"
+RULE_JL005 = "JL-005"
+RULE_JL006 = "JL-006"
+RULE_JL007 = "JL-007"
+RULE_JL008 = "JL-008"
+RULE_JL009 = "JL-009"
+RULE_JL010 = "JL-010"
+RULE_JL011 = "JL-011"
+RULE_JL012 = "JL-012"
+RULE_JL013 = "JL-013"
+RULE_JL014 = "JL-014"
 
 def rulesMap = [:]
 rulesMap.put(RULE_JL001, new Rule(id: RULE_JL001, description: "Job name", severity: HIGH))
@@ -49,6 +64,8 @@ rulesMap.put(RULE_JL011, new Rule(id: RULE_JL011, description: "Harcoded Script"
 rulesMap.put(RULE_JL012, new Rule(id: RULE_JL012, description: "Maven Job Type", severity: HIGH))
 rulesMap.put(RULE_JL013, new Rule(id: RULE_JL013, description: "Git Shallow", severity: HIGH))
 rulesMap.put(RULE_JL014, new Rule(id: RULE_JL014, description: "Multijob", severity: HIGH))
+
+jobsMap = [:]
 
 
 /**
@@ -87,10 +104,19 @@ def isIgnored(ruleId, jobDescription){
  */
 def runRule(ruleClass, itemClass) {
   if (itemClass != null && ruleClass != null) {
+    if (!jobsMap.containsKey(itemClass.name)){
+      job = new Job(name: itemClass.name, url: itemClass.absoluteUrl)
+      job.addRules(rulesMap)
+      jobsMap.put(itemClass.name, job)
+    }
     if (!isIgnored(ruleClass.id,itemClass.description)){
       ruleClass.addJob(itemClass.name)
       printRule (ruleClass, itemClass.name)
+      status = ruleClass.severity
+    } else {
+      status = IGNORED
     }
+    jobsMap[itemClass.name].addRule(ruleClass.id, status)
   }
 }
 
@@ -115,7 +141,7 @@ jobs?.findAll{ it.scm instanceof hudson.scm.NullSCM && !it.disabled }.each {
 
 TriggerDescriptor SCM_TRIGGER_DESCRIPTOR = Hudson.instance.getDescriptorOrDie(SCMTrigger.class)
 jobs?.findAll{ it.triggers.get(SCM_TRIGGER_DESCRIPTOR) && it.triggers.get(SCM_TRIGGER_DESCRIPTOR) instanceof SCMTrigger && !it.disabled }.each {
-    runRule (rulesMap[RULE_JL005], it)
+  runRule (rulesMap[RULE_JL005], it)
 }
 
 TriggerDescriptor SCM_TIMER_TRIGGER_DESCRIPTOR = Hudson.instance.getDescriptorOrDie(TimerTrigger.class)
@@ -194,8 +220,8 @@ html.omitEmptyAttributes = false
 html.omitNullAttributes = false
 html.table(class:"stats-table") {
   tr {
-    td(id:"stats-header-ruleid", "Job")
-    td(id:"stats-header-ruleid-total", "Total")
+    th(id:"stats-header-ruleid", "Job")
+    th(id:"stats-header-ruleid-total", "Total")
   }
   rulesMap.each{item->
     tr {
