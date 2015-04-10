@@ -22,9 +22,9 @@ class Job {
     def addRule(String ruleName, String status) {
       ruleList.put(ruleName, status)
     }
-    def addRules(LinkedHashMap rules) {
+    def initRuleList(LinkedHashMap rules) {
       rules.each{
-        addRule(it.key, it.value.severity)
+        addRule(it.key, "EMPTY")
       }
     }
 }
@@ -106,7 +106,7 @@ def runRule(ruleClass, itemClass) {
   if (itemClass != null && ruleClass != null) {
     if (!jobsMap.containsKey(itemClass.name)){
       job = new Job(name: itemClass.name, url: itemClass.absoluteUrl)
-      job.addRules(rulesMap)
+      job.initRuleList(rulesMap)
       jobsMap.put(itemClass.name, job)
     }
     if (!isIgnored(ruleClass.id,itemClass.description)){
