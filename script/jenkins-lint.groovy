@@ -249,7 +249,7 @@ html1.table(class:"stats-table") {
   jobsMap.each{item->
     tr {
         td(style:"background-color: #C5D88A") {
-          a href: "$item.value.url", "$item.value.name"
+          a href: "$item.value.url", target:"_blank", "$item.value.name"
         }
         item.value.ruleList.each{
           td(style:"background-color: #C5D88A", it.value)
