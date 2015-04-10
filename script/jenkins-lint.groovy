@@ -50,6 +50,7 @@ rulesMap.put(RULE_JL012, new Rule(id: RULE_JL012, description: "Maven Job Type",
 rulesMap.put(RULE_JL013, new Rule(id: RULE_JL013, description: "Git Shallow", severity: HIGH))
 rulesMap.put(RULE_JL014, new Rule(id: RULE_JL014, description: "Multijob", severity: HIGH))
 
+
 /**
  * Print rule with provided rule and jobName.
  *
@@ -81,15 +82,14 @@ def isIgnored(ruleId, jobDescription){
  * Return if ruleId has been ignored in the job description.
  *
  * @param ruleClass Rule instance.
- * @param jobName Job name.
- * @param jobDescription Job description.
+ * @param itemClass Job instance.
  * @return Boolean whether that ruleId has been ignored or not.
  */
-def runRule(ruleClass, jobName, jobDescription) {
-  if (jobName != null && ruleClass != null) {
-    if (!isIgnored(ruleClass.id,jobDescription)){
-      ruleClass.addJob(jobName)
-      printRule (ruleClass, jobName)
+def runRule(ruleClass, itemClass) {
+  if (itemClass != null && ruleClass != null) {
+    if (!isIgnored(ruleClass.id,itemClass.description)){
+      ruleClass.addJob(itemClass.name)
+      printRule (ruleClass, itemClass.name)
     }
   }
 }
@@ -98,35 +98,35 @@ def runRule(ruleClass, jobName, jobDescription) {
 jobs = Hudson.instance?.items
 
 jobs?.findAll{ !it.disabled && it.name.contains(" ") }.each {
-  runRule (rulesMap[RULE_JL001], it.name, it.description)
+  runRule (rulesMap[RULE_JL001], it)
 }
 
 jobs?.findAll{ !it.logRotator && !it.disabled }.each {
-  runRule (rulesMap[RULE_JL002], it.name, it.description)
+  runRule (rulesMap[RULE_JL002], it)
 }
 
 jobs?.findAll{ !it.description && !it.disabled }.each {
-  runRule (rulesMap[RULE_JL003], it.name, it.description)
+  runRule (rulesMap[RULE_JL003], it)
 }
 
 jobs?.findAll{ it.scm instanceof hudson.scm.NullSCM && !it.disabled }.each {
-  runRule (rulesMap[RULE_JL004], it.name, it.description)
+  runRule (rulesMap[RULE_JL004], it)
 }
 
 TriggerDescriptor SCM_TRIGGER_DESCRIPTOR = Hudson.instance.getDescriptorOrDie(SCMTrigger.class)
 jobs?.findAll{ it.triggers.get(SCM_TRIGGER_DESCRIPTOR) && it.triggers.get(SCM_TRIGGER_DESCRIPTOR) instanceof SCMTrigger && !it.disabled }.each {
-    runRule (rulesMap[RULE_JL005], it.name, it.description)
+    runRule (rulesMap[RULE_JL005], it)
 }
 
 TriggerDescriptor SCM_TIMER_TRIGGER_DESCRIPTOR = Hudson.instance.getDescriptorOrDie(TimerTrigger.class)
 jobs?.findAll{ it.triggers.get(SCM_TIMER_TRIGGER_DESCRIPTOR) && it.triggers.get(SCM_TIMER_TRIGGER_DESCRIPTOR) instanceof TimerTrigger && 
                it.triggers.get(SCM_TRIGGER_DESCRIPTOR) && it.triggers.get(SCM_TRIGGER_DESCRIPTOR) instanceof SCMTrigger && 
                !it.disabled }.each {
-    runRule (rulesMap[RULE_JL006], it.name, it.description)
+    runRule (rulesMap[RULE_JL006], it)
 }
 
 jobs?.findAll{ !it.disabled && !it.getAssignedLabelString() }.each {
-    runRule (rulesMap[RULE_JL007], it.name, it.description)
+    runRule (rulesMap[RULE_JL007], it)
 }
 
 // PUBLISHERS
@@ -151,9 +151,9 @@ jobs?.findAll{ !it.disabled }.each {
         }
       }
   }
-  if (!hasCleanup)  { runRule (rulesMap[RULE_JL008], it.name, it.description) }
-  if (!hasJavadoc)  { runRule (rulesMap[RULE_JL009], it.name, it.description) }
-  if (!hasArtifact) { runRule (rulesMap[RULE_JL010], it.name, it.description) }
+  if (!hasCleanup)  { runRule (rulesMap[RULE_JL008], it) }
+  if (!hasJavadoc)  { runRule (rulesMap[RULE_JL009], it) }
+  if (!hasArtifact) { runRule (rulesMap[RULE_JL010], it) }
 }
 
 // BUILDERS
@@ -161,13 +161,13 @@ jobs?.findAll{ !it.disabled && !it instanceof hudson.maven.MavenModuleSet && it.
   for(p in it.builders) {
     if (( p instanceof hudson.tasks.Shell || p instanceof hudson.tasks.BatchFile ) &&
           p.getContents().split("\r\n|\r|\n").length > 3) {
-      runRule (rulesMap[RULE_JL011], it.name, it.description)
+      runRule (rulesMap[RULE_JL011], it)
     }
   }
 }
 
 jobs?.findAll{ !it.disabled && it instanceof hudson.maven.MavenModuleSet}.each {
-  runRule (rulesMap[RULE_JL012], it.name, it.description)
+  runRule (rulesMap[RULE_JL012], it)
 }
 
 // GIT SCM
@@ -175,14 +175,14 @@ jobs?.findAll{ it.scm && it.scm instanceof hudson.plugins.git.GitSCM &&
                it.scm.getExtensions() && !it.disabled }.each {
   for (p in it.scm.getExtensions()) {
     if (p instanceof hudson.plugins.git.extensions.impl.CloneOption && !p.isShallow()){
-      runRule (rulesMap[RULE_JL013], it.name, it.description)
+      runRule (rulesMap[RULE_JL013], it)
     }
   }
 }
 
 jobs?.findAll{ !it.disabled && it instanceof com.tikal.jenkins.plugins.multijob.MultiJobProject &&
               (!it.getAssignedLabelString() || !it.getAssignedLabelString().contains("multijob")) }.each {
-  runRule (rulesMap[RULE_JL014], it.name, it.description)
+  runRule (rulesMap[RULE_JL014], it)
 }
 
 // HTML formatting
