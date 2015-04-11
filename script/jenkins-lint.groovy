@@ -284,21 +284,21 @@ def generateHtmlRulesTable(rulesMap, jobsMap){
           item.value.ruleList.each{
             switch (it.value) {
               case HIGH :
-              color = "#FF5930"
-              break
-                case MEDIUM :
-              color = "#FFFF66"
-              break
-                case LOW :
-              color = "#3A8A8A"
-              break
-                case IGNORED :
-              color = "#8A8A8A"
-              break
-                default :
-              color = "#C5D88A"
-              break
-                }
+                color = "#FF5930"
+                break
+              case MEDIUM :
+                color = "#FFFF66"
+                break
+              case LOW :
+                color = "#3A8A8A"
+                break
+              case IGNORED :
+                color = "#8A8A8A"
+                break
+              default :
+                color = "#C5D88A"
+                break
+            }
             td(style:"background-color: $color")
           }
         }
