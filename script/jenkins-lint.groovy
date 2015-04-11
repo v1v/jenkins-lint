@@ -293,10 +293,10 @@ def generateHtmlRulesTable(rulesMap, jobsMap){
                 color = "#3A8A8A"
                 break
               case IGNORED :
-                color = "#8A8A8A"
+                color = "#848484"
                 break
               default :
-                color = "#C5D88A"
+                color = "#FFFFFF"
                 break
             }
             td(style:"background-color: $color")
