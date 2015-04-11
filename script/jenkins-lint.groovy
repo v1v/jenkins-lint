@@ -1,4 +1,4 @@
-import groovy.xml.MarkupBuilder
+import groovy.xml.StreamingMarkupBuilder
 import hudson.model.*
 import hudson.triggers.*
 import groovy.transform.ToString
@@ -8,9 +8,13 @@ class Rule {
     String id
     String description
     String severity
+    int totalIgnored = 0
     ArrayList jobList = new ArrayList()
     def addJob(String jobName) {
       jobList.add(jobName)
+    }
+    def incTotalIgnored() {
+       totalIgnored++
     }
 }
 
@@ -51,10 +55,10 @@ RULE_JL014 = "JL-014"
 
 rulesMap = [:]
 rulesMap.put(RULE_JL001, new Rule(id: RULE_JL001, description: "Job name", severity: HIGH))
-rulesMap.put(RULE_JL002, new Rule(id: RULE_JL002, description: "Log Rotator doesn't exist", severity: HIGH))
-rulesMap.put(RULE_JL003, new Rule(id: RULE_JL003, description: "Description hasn't been set", severity: HIGH))
-rulesMap.put(RULE_JL004, new Rule(id: RULE_JL004, description: "SCM hasn't been set", severity: HIGH))
-rulesMap.put(RULE_JL005, new Rule(id: RULE_JL005, description: "SCM trigger is polling rather than pulling", severity: HIGH))
+rulesMap.put(RULE_JL002, new Rule(id: RULE_JL002, description: "Log Rotator does not exist", severity: HIGH))
+rulesMap.put(RULE_JL003, new Rule(id: RULE_JL003, description: "Description has not been set", severity: HIGH))
+rulesMap.put(RULE_JL004, new Rule(id: RULE_JL004, description: "SCM has not been set", severity: HIGH))
+rulesMap.put(RULE_JL005, new Rule(id: RULE_JL005, description: "SCM trigger is polling rather than pushing", severity: HIGH))
 rulesMap.put(RULE_JL006, new Rule(id: RULE_JL006, description: "SCM trigger is duplicated", severity: HIGH))
 rulesMap.put(RULE_JL007, new Rule(id: RULE_JL007, description: "Restric Label executions", severity: HIGH))
 rulesMap.put(RULE_JL008, new Rule(id: RULE_JL008, description: "CleanUp Workspace", severity: HIGH))
@@ -75,7 +79,7 @@ jobsMap = [:]
  * @param jobName Name of the Job.
  */
 def printRule(ruleClass, jobName) {
-   //println "\t$ruleClass.id|$ruleClass.description|$ruleClass.severity|$jobName"
+   println "\t$ruleClass.id|$ruleClass.description|$ruleClass.severity|$jobName"
 }
 
 /**
@@ -115,6 +119,7 @@ def runRule(ruleClass, itemClass) {
       status = ruleClass.severity
     } else {
       status = IGNORED
+      ruleClass.incTotalIgnored()
     }
     jobsMap[itemClass.name].addRule(ruleClass.id, status)
   }
@@ -211,68 +216,99 @@ jobs?.findAll{ !it.disabled && it instanceof com.tikal.jenkins.plugins.multijob.
   runRule (rulesMap[RULE_JL014], it)
 }
 
-// HTML formatting
-def sb = new StringWriter()
-def html = new MarkupBuilder(sb)
-html.doubleQuotes = true
-html.expandEmptyElements = true
-html.omitEmptyAttributes = false
-html.omitNullAttributes = false
-html.table(class:"stats-table") {
-  tr {
-    th(id:"stats-header-ruleid", "Job")
-    th(id:"stats-header-ruleid-total", "Total")
-  }
-  rulesMap.each{item->
-    tr {
-      td(style:"background-color: #C5D88A", item.value.id)
-      td(style:"background-color: #C5D88A", item.value.jobList.size())
+
+/**
+ *
+ *
+ * @param rulesMap
+ * @return Html Table.
+ */
+def generateHtmlStats(rulesMap){
+  writer = new StringWriter()
+  def total = jobs?.findAll{ !it.disabled }.size
+  writer << new StreamingMarkupBuilder().bind {
+    chart_data {
+      row {
+        foo()
+        rulesMap.each{item->
+          string("$item.value.id")
+        }
+      }
+      row {
+        string "Passed"
+        rulesMap.each{item->
+          value = total - item.value.jobList.size() - item.value.totalIgnored
+          number tooltip: "$value passed job(s). $item.value.description", value
+        }
+      }
+      row {
+        string "Failed"
+        rulesMap.each{item->
+          number tooltip: "$item.value.jobList.size defect(s). $item.value.description", item.value.jobList.size()
+        }
+      }
+      row {
+        string "Ignored"
+        rulesMap.each{item->
+          number tooltip: "$item.value.totalIgnored ignored job(s). $item.value.description", item.value.totalIgnored
+        }
+      }
     }
   }
+  writer.toString()
 }
 
-new File(build.getEnvironment(listener).get('WORKSPACE') + "/build/generated.html").withWriter {it.println sb.toString()}
 
-def sb1 = new StringWriter()
-def html1 = new MarkupBuilder(sb1)
-html1.doubleQuotes = true
-html1.expandEmptyElements = true
-html1.omitEmptyAttributes = false
-html1.omitNullAttributes = false
-html1.table(class:"stats-table") {
-  tr {
-    th(id:"stats-header-jobname", "Job Name")
-    rulesMap.each{item->
-      th(id:"stats-header-rule-$item.key", "$item.key")
-    }
-  }
-  jobsMap.each{item->
-    tr {
-        td(style:"background-color: #C5D88A") {
-          a href: "$item.value.url", target:"_blank", "$item.value.name"
+/**
+ *
+ *
+ * @param rulesMap
+ * @param jobsMap.
+ * @return Html Table.
+ */
+def generateHtmlRulesTable(rulesMap, jobsMap){
+  writer = new StringWriter()
+  writer << new StreamingMarkupBuilder().bind {
+    table(class:"stats-table") {
+      tr {
+        th(id:"stats-header-jobname", "Job Name")
+        rulesMap.each{item->
+          th(id:"stats-header-rule-$item.key", "$item.key")
         }
-        item.value.ruleList.each{
-          switch (it.value) {
-            case HIGH :
+      }
+      jobsMap.each{item->
+        tr {
+          td(style:"background-color: #C5D88A") {
+            a href: "$item.value.url", target:"_blank", "$item.value.name"
+          }
+          item.value.ruleList.each{
+            switch (it.value) {
+              case HIGH :
               color = "#FF5930"
               break
-            case MEDIUM :
+                case MEDIUM :
               color = "#FFFF66"
               break
-            case LOW :
+                case LOW :
               color = "#3A8A8A"
               break
-            case IGNORED :
+                case IGNORED :
               color = "#8A8A8A"
               break
-            default :
+                default :
               color = "#C5D88A"
               break
+                }
+            td(style:"background-color: $color", it.value)
           }
-          td(style:"background-color: $color", it.value)
         }
+      }
     }
   }
+  writer.toString()
 }
 
-new File(build.getEnvironment(listener).get('WORKSPACE') + "/build/generated1.html").withWriter {it.println sb1.toString()}
+rulesTable = generateHtmlRulesTable(rulesMap, jobsMap)
+htmlStats = generateHtmlStats(rulesMap)
+
+def generatedPath = build.getEnvironment(listener).get('WORKSPACE') + "/build"
