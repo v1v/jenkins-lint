@@ -311,4 +311,10 @@ def generateHtmlRulesTable(rulesMap, jobsMap){
 rulesTable = generateHtmlRulesTable(rulesMap, jobsMap)
 htmlStats = generateHtmlStats(rulesMap)
 
-def generatedPath = build.getEnvironment(listener).get('WORKSPACE') + "/build"
+generatedPath = build.getEnvironment(listener).get('WORKSPACE')
+
+myFile = new File(generatedPath + "/jenkins-lint-html-reports/overview.html")
+fileText = myFile.text
+fileText = (fileText =~ /BlaBlaBla/).replaceFirst(htmlStats)
+fileText = (fileText =~ /ToKeN/).replaceFirst(rulesTable)
+myFile.write(fileText)
