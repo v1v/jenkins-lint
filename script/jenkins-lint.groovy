@@ -278,7 +278,7 @@ def generateHtmlRulesTable(rulesMap, jobsMap){
       }
       jobsMap.each{item->
         tr {
-          td(style:"background-color: #C5D88A") {
+          td{
             a href: "$item.value.url", target:"_blank", "$item.value.name"
           }
           item.value.ruleList.each{
