@@ -59,11 +59,11 @@ rulesMap.put(RULE_JL002, new Rule(id: RULE_JL002, description: "Log Rotator does
 rulesMap.put(RULE_JL003, new Rule(id: RULE_JL003, description: "Description has not been set", severity: HIGH))
 rulesMap.put(RULE_JL004, new Rule(id: RULE_JL004, description: "SCM has not been set", severity: HIGH))
 rulesMap.put(RULE_JL005, new Rule(id: RULE_JL005, description: "SCM trigger is polling rather than pushing", severity: HIGH))
-rulesMap.put(RULE_JL006, new Rule(id: RULE_JL006, description: "SCM trigger is duplicated", severity: HIGH))
+rulesMap.put(RULE_JL006, new Rule(id: RULE_JL006, description: "SCM trigger is duplicated", severity: LOW))
 rulesMap.put(RULE_JL007, new Rule(id: RULE_JL007, description: "Restric Label executions", severity: HIGH))
 rulesMap.put(RULE_JL008, new Rule(id: RULE_JL008, description: "CleanUp Workspace", severity: HIGH))
 rulesMap.put(RULE_JL009, new Rule(id: RULE_JL009, description: "Javadoc", severity: HIGH))
-rulesMap.put(RULE_JL010, new Rule(id: RULE_JL010, description: "Artifact", severity: HIGH))
+rulesMap.put(RULE_JL010, new Rule(id: RULE_JL010, description: "Artifact", severity: MEDIUM))
 rulesMap.put(RULE_JL011, new Rule(id: RULE_JL011, description: "Harcoded Script", severity: HIGH))
 rulesMap.put(RULE_JL012, new Rule(id: RULE_JL012, description: "Maven Job Type", severity: HIGH))
 rulesMap.put(RULE_JL013, new Rule(id: RULE_JL013, description: "Git Shallow", severity: HIGH))
@@ -296,7 +296,7 @@ def generateHtmlRulesTable(rulesMap, jobsMap){
                 color = "#848484"
                 break
               default :
-                color = "#FFFFFF"
+                color = "#C5D88A"
                 break
             }
             td(style:"background-color: $color")
