@@ -299,7 +299,7 @@ def generateHtmlRulesTable(rulesMap, jobsMap){
               color = "#C5D88A"
               break
                 }
-            td(style:"background-color: $color", it.value)
+            td(style:"background-color: $color")
           }
         }
       }
