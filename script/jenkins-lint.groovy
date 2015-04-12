@@ -1,4 +1,5 @@
 import groovy.xml.StreamingMarkupBuilder
+import groovy.xml.MarkupBuilder
 import hudson.model.*
 import hudson.triggers.*
 import groovy.transform.ToString
@@ -308,13 +309,43 @@ def generateHtmlRulesTable(rulesMap, jobsMap){
   writer.toString()
 }
 
+/**
+ *
+ *
+ * @param rulesMap
+ * @return Html Table.
+ */
+def generateJunitFormat(rulesMap){
+  def writer = new StringWriter()
+  def junit = new MarkupBuilder(writer)
+  junit.doubleQuotes = true
+  junit.expandEmptyElements = true
+  junit.omitEmptyAttributes = false
+  junit.omitNullAttributes = false
+  junit.testsuite {
+    rulesMap.each{rule->
+      if (rule.value.jobList.size() > 0 ){
+        rule.value.jobList.each{job->
+          testcase(name: "$job", classname: "jenkins-lint.$rule.value.id"){
+            failure(message: "$rule.value.id - $rule.value.description", rule.value.description)
+          }
+        }
+      }
+    }
+  }
+  writer.toString()
+}
+
 rulesTable = generateHtmlRulesTable(rulesMap, jobsMap)
 htmlStats = generateHtmlStats(rulesMap)
+junitFormat = generateJunitFormat(rulesMap)
 
 generatedPath = build.getEnvironment(listener).get('WORKSPACE')
 
-myFile = new File(generatedPath + "/jenkins-lint-html-reports/overview.html")
-fileText = myFile.text
+new File(generatedPath + "/jenkins-lint.junit").withWriter {it.println junitFormat}
+
+htmlFile = new File(generatedPath + "/jenkins-lint-html-reports/overview.html")
+fileText = htmlFile.text
 fileText = (fileText =~ /BlaBlaBla/).replaceFirst(htmlStats)
 fileText = (fileText =~ /ToKeN/).replaceFirst(rulesTable)
-myFile.write(fileText)
+htmlFile.write(fileText)
