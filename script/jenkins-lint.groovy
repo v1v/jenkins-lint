@@ -172,8 +172,12 @@ jobs?.findAll{ !it.disabled }.each {
   }
   else {
       for(p in it.getPublishersList()) {
-        if(p instanceof hudson.plugins.ws_cleanup.WsCleanup) {
-            hasCleanup = true
+        try {
+          if(p instanceof hudson.plugins.ws_cleanup.WsCleanup) {
+              hasCleanup = true
+          }
+        } catch (org.codehaus.groovy.control.MultipleCompilationErrorsException e){
+          println "WARNING: Workspace Cleanup plugin doesn't exist! Please install it"
         }
         if(p instanceof hudson.tasks.JavadocArchiver && !p.javadocDir) {
             hasJavadoc = false
