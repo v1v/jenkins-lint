@@ -285,13 +285,13 @@ def generateHtmlRulesTable(rulesMap, jobsMap){
           item.value.ruleList.each{
             switch (it.value) {
               case HIGH :
-                color = "#FF5930"
+                color = "#FF3333"
                 break
               case MEDIUM :
-                color = "#FFFF66"
+                color = "#FFAD33"
                 break
               case LOW :
-                color = "#3A8A8A"
+                color = "#7094FF"
                 break
               case IGNORED :
                 color = "#848484"
