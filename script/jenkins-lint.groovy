@@ -274,7 +274,7 @@ def generateHtmlRulesTable(rulesMap, jobsMap){
       tr {
         th(id:"stats-header-jobname", "Job Name")
         rulesMap.each{item->
-          th(id:"stats-header-rule-$item.key", "$item.key")
+          th(id:"stats-header-rule-$item.key", title:"$item.value.description", "$item.key")
         }
       }
       jobsMap.each{item->
