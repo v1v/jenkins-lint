@@ -305,7 +305,7 @@ def generateHtmlRulesTable(rulesMap, jobsMap){
                 color = "#C5D88A"
                 break
             }
-            td(style:"background-color: $color")
+            td(style:"background-color: $color", title:"$it.value")
           }
           int percentage = Math.round((failures / item.value.ruleList.size()) * 100)
           td ("$percentage %")
