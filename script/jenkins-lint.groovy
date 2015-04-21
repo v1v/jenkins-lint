@@ -151,8 +151,8 @@ jobs?.findAll{ it.triggers.get(SCM_TRIGGER_DESCRIPTOR) && it.triggers.get(SCM_TR
 }
 
 TriggerDescriptor SCM_TIMER_TRIGGER_DESCRIPTOR = Hudson.instance.getDescriptorOrDie(TimerTrigger.class)
-jobs?.findAll{ it.triggers.get(SCM_TIMER_TRIGGER_DESCRIPTOR) && it.triggers.get(SCM_TIMER_TRIGGER_DESCRIPTOR) instanceof TimerTrigger && 
-               it.triggers.get(SCM_TRIGGER_DESCRIPTOR) && it.triggers.get(SCM_TRIGGER_DESCRIPTOR) instanceof SCMTrigger && 
+jobs?.findAll{ it.triggers.get(SCM_TIMER_TRIGGER_DESCRIPTOR) && it.triggers.get(SCM_TIMER_TRIGGER_DESCRIPTOR) instanceof TimerTrigger &&
+               it.triggers.get(SCM_TRIGGER_DESCRIPTOR) && it.triggers.get(SCM_TRIGGER_DESCRIPTOR) instanceof SCMTrigger &&
                !it.disabled }.each {
     runRule (rulesMap[RULE_JL006], it)
 }
@@ -342,6 +342,7 @@ junitFormat = generateJunitFormat(rulesMap)
 
 generatedPath = build.getEnvironment(listener).get('WORKSPACE')
 
+new File(generatedPath + "/rules.html").withWriter {it.println rulesTable}
 new File(generatedPath + "/jenkins-lint.junit").withWriter {it.println junitFormat}
 
 htmlFile = new File(generatedPath + "/jenkins-lint-html-reports/overview.html")
