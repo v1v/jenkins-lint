@@ -29,7 +29,7 @@ class Job {
     }
     def initRuleList(LinkedHashMap rules) {
       rules.each{
-        addRule(it.key, "EMPTY")
+        addRule(it.key, "Passed")
       }
     }
 }
