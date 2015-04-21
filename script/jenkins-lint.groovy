@@ -276,22 +276,27 @@ def generateHtmlRulesTable(rulesMap, jobsMap){
         rulesMap.each{item->
           th(id:"stats-header-rule-$item.key", title:"$item.value.description", "$item.key")
         }
+        th(id:"stats-header-weather", "Weather")
       }
       jobsMap.each{item->
         tr {
           td{
             a href: "$item.value.url", target:"_blank", "$item.value.name"
           }
+          int failures = 0
           item.value.ruleList.each{
             switch (it.value) {
               case HIGH :
                 color = "#FF8566"
+                failures++
                 break
               case MEDIUM :
                 color = "#FFC266"
+                failures++
                 break
               case LOW :
                 color = "#FFFF99"
+                failures++
                 break
               case IGNORED :
                 color = "#D8D8D7"
@@ -302,6 +307,8 @@ def generateHtmlRulesTable(rulesMap, jobsMap){
             }
             td(style:"background-color: $color")
           }
+          int percentage = Math.round((failures / item.value.ruleList) * 100)
+          td ("$percentage %")
         }
       }
     }
